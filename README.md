@@ -1,5 +1,4 @@
 # Vonage
-My journay with vonage begins here
 number-insight project with vonage formerly known as nexmo
 Standard API includes all of the locale and formatting information from the Basic API and returns extra data about the type of number, whether it is ported and the identity of the caller (US only).
 
