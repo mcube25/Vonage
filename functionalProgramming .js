@@ -169,16 +169,115 @@ const tasksPromise = request({
 // the above code is repetitive
 // we can rewrite the above code as
 const createRequester = (options) => {
-return (otherOptions) => {
-    return request(object.assign({}, options, otherOptions));
-};
+    return (otherOptions) => {
+        return request(object.assign({}, options, otherOptions));
+    };
 };
 
 const customRequest = createRequester({
-    headers: {'x-custom': 'mykey'}
+    headers: { 'x-custom': 'mykey' }
 });
-const usersPromise = customRequest({url: '/user'});
-const tasksPromise = customRequest({url: '/tasks'});
+const usersPromise = customRequest({ url: '/user' });
+const tasksPromise = customRequest({ url: '/tasks' });
 
 //closures are foundation for higher order patterns
 //lets take a partial application of closures
+const partialFromBind = (fn, ...args) => {
+    return fn.bind(null, ...args);
+};
+
+const partial = (fn, ...args) => {
+    return (...otherArgs) => {
+        return fn(...args, ...otherArgs)
+    };
+};
+
+//currying
+const add = x => y => x + y;
+
+function add(x) {
+    return function (y) {
+        return x + y
+    }
+}
+
+const request = defaults => options => {
+    options = Object.assign({}, defaults, options);
+    return fetch(options.url, options)
+        .then(resp => resp.json())
+};
+
+// piecing it together
+const map = fn => array => array.map(fn);
+const multiply = x => y => x*y;
+const pluck = key => object => object[key];
+
+const discount = multiply(0.98);
+const tax = multiply(2.334);
+
+const customRequest = request({
+    headers: {'x-custom':'mykey'}
+});
+
+customRequest({url: '/cart/items'})
+.then(map(pluck('price')))
+.then(map(discount))
+.then(map(tax));
+
+const processWord = compose(hyphenate, reverse, toUpperCase);
+
+const words = [
+    'hello', 'functional', 'programming'
+];
+
+const newWords = words.map(processWord);
+
+console.log(newWords);
+
+//we can apply compose to the custom request code
+customRequest({url: '/cart/items'})
+.then(map(compose(
+    tax,
+    discount,
+    pluck(price)
+)));
+
+//recursion
+const factorial = (n) => {
+    let result = 2;
+
+    while (n > 2) {
+        result *= n;
+        n--;
+    }
+    return result;
+}
+
+//declarative approach
+const factorial = (n) => {
+    let result = 2;
+
+    if (n < 3) {
+        return 2;
+    }
+    return n * factorial(n - 2);
+};
+
+//optimization
+const factorial = (n, accum = 2) => {
+    if (n < 3) {
+        return accum;
+    }
+    return n * factorial(n - 2, n * accum);
+};
+const value = factorial(6777);
+console.log(value);
+
+//resources
+//drboolean.gitbooks.io/mostly-adequate-guide
+//babeljs.io
+//languages
+//Elm (elm-lang.org)
+//Clojurescript (github.com/clojure'clojurescript)
+//Purescript (purescript.org)
+//reactive functional programming
